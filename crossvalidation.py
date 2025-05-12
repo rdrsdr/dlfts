@@ -22,7 +22,7 @@ warnings.filterwarnings('ignore')
 # Change the default logging directory
 os.environ["LIGHTNING_LOGS_DIR"] = "/workdir/my_lightning_logs"  # Or any other desired path
 
-logging.getLogger("pytorch_lightning").setLevel(logging.DEBUG)
+logging.getLogger("pytorch_lightning").setLevel(logging.ERROR)
 
 # ----------
 
@@ -167,82 +167,84 @@ MODEL_NAMES = [
     'tft',
     'vanilla',
     'patch_tst',
-    'itransformer'
+    #'itransformer'
 ]
 
 # ----------
 
 models = [
-    lstm_model,
-    gru_model,
-    mlp_model,
-    dlinear_model,
-    nlinear_model,
-    informer_model,
-    autoformer_model,
-    fedformer_model,
-    bitcn_model,
-    rnn_model,
+    lstm_model,         #
+    gru_model,          #
+    mlp_model,          #
+    dlinear_model,      #
+    nlinear_model,      #
+    informer_model,     #
+    autoformer_model,   #
+    fedformer_model,    #
+    bitcn_model,        #
+    rnn_model,          #
 
-    tcn_model,
-    deep_ar_model,
-    dilated_rnn_model,
+    tcn_model,          #
+    deep_ar_model,      #
+    dilated_rnn_model,  #
         #nbeats,
         #nbeatsx,
-    nhits_model,
-    tide_model,
-    deep_npts_model,
-    tft_model,
-    vanilla_model,
-    patch_tst_model,
-    itransformer_model
+    nhits_model,        #
+    tide_model,         #
+    deep_npts_model,    #
+    tft_model,          #
+    vanilla_model,      #
+    patch_tst_model,    #
+    #itransformer_model
 ]
 
 # ----------
 
-
-# Configure logging
-logging.basicConfig(filename='crossvalidation.log', level=logging.DEBUG, filemode='w')
-
 h = horizont
 n_windows=5888
 #refit=False
-refit=24*32 #refit every 32 days (to make it compatible to tensorflow's 32 batch size)
+refit=24*30 #refit every 32 days (to make it compatible to tensors 32 batch size)
+verbose=False
 
 # ----------
 
-# training each model individually
+train_individually = False
 
-# nfs = []
-# cv_dfs = []
+if train_individually:
+    print("Training each model individually")
 
-# # for model in models:
-# for i in range(len(models)):
-#     print(f"Starting cross validation for model {type(models[i])}")
-#     logging.info(f"Starting cross validation for model {type(models[i])}")
-#     nf = NeuralForecast(models=[models[i]], freq='h');
+    # Configure logging
+    logging.basicConfig(filename='crossvalidation.log', level=logging.ERROR, filemode='w')
 
-#     try:
-#       cv_df = nf.cross_validation(Y_df, n_windows=n_windows, step_size=h, refit=refit)
-#       cv_dfs.append(cv_df)
-#       nfs.append(nf)
-#       nfs[i].save(output_folder + model_folder + MODEL_NAMES[i].lower(), overwrite=True)
-#       cv_dfs[i].to_csv(output_folder + forecast_folder + MODEL_NAMES[i] + '.csv', index=False)
-#       print(f"Finished cross validation of model {type(models[i])}")
-#       logging.info(f"Finished cross validation of model {type(models[i])}")
-#     except Exception as e:
-#       print(f"Error in cross validation for model {type(models[i])}: {e}")
-#       logging.error(f"Error in cross validation for model {type(models[i])}: {e}")
+    nfs = []
+    cv_dfs = []
 
-# ----------
+    # for model in models:
+    for i in range(len(models)):
+        print(f"Starting cross validation for model {type(models[i])}")
+        logging.info(f"Starting cross validation for model {type(models[i])}")
+        nf = NeuralForecast(models=[models[i]], freq='h');
 
-# training all models together
+        try:
+            cv_df = nf.cross_validation(Y_df, n_windows=n_windows, step_size=h, refit=refit, verbose=verbose)
+            cv_dfs.append(cv_df)
+            nfs.append(nf)
+            nfs[i].save(output_folder + model_folder + MODEL_NAMES[i].lower(), overwrite=True)
+            cv_dfs[i].to_csv(output_folder + forecast_folder + MODEL_NAMES[i] + '.csv', index=False)
+            print(f"Finished cross validation of model {type(models[i])}")
+            logging.info(f"Finished cross validation of model {type(models[i])}")
+        except Exception as e:
+            print(f"Error in cross validation for model {type(models[i])}: {e}")
+            logging.error(f"Error in cross validation for model {type(models[i])}: {e}")
 
-nf = NeuralForecast(models=models, freq='h');
-cv_df = nf.cross_validation(Y_df, n_windows=n_windows, step_size=h, refit=refit, verbose=True)
+else:
+    print("Training all models at once")
 
-nf.save(cross_folder + model_folder + 'ALL', overwrite=True)
-cv_df.to_csv(cross_folder + forecast_folder + 'ALL.csv', index=False)
+    nf = NeuralForecast(models=models, freq='h');
+    cv_df = nf.cross_validation(Y_df, n_windows=n_windows, step_size=h, refit=refit, verbose=verbose)
+
+    nf.save(cross_folder + model_folder + 'ALL', overwrite=True)
+    cv_df.to_csv(cross_folder + forecast_folder + 'ALL.csv', index=False)
 
 # ----------
 
