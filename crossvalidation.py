@@ -30,7 +30,7 @@ folder = './datasets/crypto/hourly/'
 
 cross_folder = folder + '/cross-validation/plain'
 refit_folder = folder + '/cross-validation/refit'
-output_folder = refit_folder
+output_folder = cross_folder
 
 model_folder = '/models/'
 forecast_folder = '/forecasts/'
@@ -202,13 +202,13 @@ models = [
 
 h = horizont
 n_windows=5888
-#refit=False
-refit=24*30 #refit every 32 days (to make it compatible to tensors 32 batch size)
+refit=False
+#refit=24*30 #refit every 32 days (to make it compatible to tensors 32 batch size)
 verbose=False
 
 # ----------
 
-train_individually = False
+train_individually = True
 
 if train_individually:
     print("Training each model individually")
