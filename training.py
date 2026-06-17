@@ -10,15 +10,11 @@ os.environ['NIXTLA_ID_AS_COL'] = '1'
 
 import pandas as pd
 
-#folder = './datasets/247/daily/'
-#folder = './datasets/247/hourly/'
-folder = './datasets/m6/hourly/'
-folder = './datasets/crypto/hourly/'
-
-#dataset = 'm6dataset.csv'
+folder = './datasets/binance/hourly/2022/split_1/'
 dataset = folder + 'dataset.csv'
 
 df = pd.read_csv(dataset)
+df = df.rename(columns={'date': 'Datetime'})
 #df
 
 date_column_name = df.columns[0]
@@ -45,10 +41,10 @@ def get_split_date_index(df, split_date):
 split_idx = get_split_date_index(df, split_date)
 #split_idx, df.iloc[split_idx, 0]
 
-train_df = df.iloc[:split_idx].drop('Real', axis=1)
+train_df = df.iloc[:split_idx]#.drop('Real', axis=1)
 #train_df
 
-test_df = df.iloc[split_idx:].drop('Real', axis=1)
+test_df = df.iloc[split_idx:]#.drop('Real', axis=1)
 #test_df
 
 """# NIXTLA"""
@@ -167,16 +163,16 @@ MODEL_NAMES = [
   'RNN',
 
   'TCN',
-  'DEEPAR',
-  'DILATEDRNN',
+  'DEEP_AR',
+  'DILATED_RNN',
   'NBEATS',
   'NBEATSX',
   'NHITS',
   'TiDE',
-  'DEEPNPTS',
+  'DEEP_NPTS',
   'TFT',
   'VANILLA',
-  'PATCHTST',
+  'PATCH_TST',
   'ITRANSFORMER',
   'TIMESNET'
 ]
@@ -273,7 +269,7 @@ for i in range(len(MODELS)):
     #nf.save(folder + 'models/' + MODEL_NAMES[i].lower())
     try:
         nf.fit(df=ndf)
-        nf.save(folder + 'models/' + MODEL_NAMES[i].lower())
+        nf.save(folder + 'plain/models/' + MODEL_NAMES[i].lower())
     except Exception as e:
         # Log the error with timestamp and model name
         with open('exceptions.log', 'a') as f:

@@ -15,26 +15,20 @@ arg4=$4
 
 # Call the Python script with the same arguments
 rm timing2.txt
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "DEEPAR;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+python predict.py 11 "$workdir" "$file" "$date"
+echo "DILATEDRNN;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 12 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "NHITS;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 13 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "TIDE;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 14 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "DEEPNPTS;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 15 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "TFT;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 16 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "VANILLA;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 17 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
+echo "PATCHTST;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 18 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
-python predict.py 19 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
-python predict.py 20 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
-python predict.py 21 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
-python predict.py 22 "$workdir" "$file" "$date"
 echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt

@@ -36,7 +36,5 @@ python predict.py 8 "$workdir" "$file" "$date"
 echo "RNN;$(date +"%Y-%m-%d %H:%M:%S")" >> timing.txt
 python predict.py 9 "$workdir" "$file" "$date"
 echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing.txt
+echo "TCN;$(date +"%Y-%m-%d %H:%M:%S")" >> timing2.txt
 python predict.py 10 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing.txt
-python predict.py 11 "$workdir" "$file" "$date"
-echo "finish;$(date +"%Y-%m-%d %H:%M:%S")" >> timing.txt

@@ -84,30 +84,30 @@ def get_split_date_index(df, split_date):
       return i
 
 # decomposes a pandas yfinance dataframe in numpy arrays so they can be manipulated more efficiently
-# than directly on the dataframe for producing nixtla's bizzare [unique_df, ds, y] dataframe
-def np_decompose(df, idx):
-  ncols = np.array(df.columns[1:])
-  ndates = df.iloc[:idx, 0].to_numpy()
-  ndata = df.iloc[:idx, 1:].to_numpy().transpose()
+# than directly on the dataframe for producing nixtla's long format [unique_df, ds, y] dataframe
+# def np_decompose(df, idx):
+#   ncols = np.array(df.columns[1:])
+#   ndates = df.iloc[:idx, 0].to_numpy()
+#   ndata = df.iloc[:idx, 1:].to_numpy().transpose()
 
-  return ncols, ndates, ndata
+#   return ncols, ndates, ndata
 
-# convert yfinance format to nixtla's bizzarre dataframe format
-def gen_nixtlas_bizzarre_dataframe(dec_df):
-  ncols, ndates, ndata = dec_df
-  rows, cols = ndata.shape
+# convert yfinance format to nixtla's long dataframe format
+# def gen_nixtlas_long_dataframe(dec_df):
+#   ncols, ndates, ndata = dec_df
+#   rows, cols = ndata.shape
 
-  unique_id = np.repeat(ncols, cols)
-  ds = np.tile(ndates, rows)
-  y = ndata.reshape(-1)
+#   unique_id = np.repeat(ncols, cols)
+#   ds = np.tile(ndates, rows)
+#   y = ndata.reshape(-1)
 
-  return pd.DataFrame({'unique_id': unique_id, 'ds': ds, 'y': y})
+#   return pd.DataFrame({'unique_id': unique_id, 'ds': ds, 'y': y})
 
 # numpy-pandas version
-def convert_nixtla_np(df, idx):
-  return gen_nixtlas_bizzarre_dataframe(np_decompose(df, idx))
+# def convert_nixtla_np(df, idx):
+#   return gen_nixtlas_long_dataframe(np_decompose(df, idx))
 
-# pure pandas version
+# pure pandas version (most efficient, speed and memory-wise)
 def convert_nixtla_pd(df, idx):
   # Convert from wide to long format
   df_long = df.iloc[:idx, :].melt(id_vars=[date_column_name], var_name="ticker", value_name="price")
@@ -137,7 +137,7 @@ def forecast(nf, df, idx, model_number):
         counter = div
 
     # forecasting
-    nixtla_df=convert_nixtla_np(df, split_idx + i)
+    nixtla_df=convert_nixtla_pd(df, split_idx + i)
     pred = nf.predict(df=nixtla_df)
 
     # transposing the prediction and adjusting columns
@@ -157,30 +157,30 @@ def forecast(nf, df, idx, model_number):
 #---------- Constants ----------
 
 MODEL_NAMES = [
-    'lstm', # ......... 0
-    'gru', # .......... 1
-    'mlp', # .......... 2
-    'dlinear', # ...... 3
-    'nlinear', # ...... 4
-    'informer', # ..... 5
-    'autoformer', # ... 6
-    'fedformer', # .... 7
-    'bitcn', # ........ 8
-    'rnn', # .......... 9
+    'lstm', # ..........  0
+    'gru', # ...........  1
+    'mlp', # ...........  2
+    'dlinear', # .......  3
+    'nlinear', # .......  4
+    'informer', # ......  5
+    'autoformer', # ....  6
+    'fedformer', # .....  7
+    'bitcn', # .........  8
+    'rnn', # ...........  9
+    'tcn', # ........... 10
 
-    'tcn',
-    'deepar',
-    'dilatedrnn',
-    'nbeats',
-    'nbeatsx',
-    'nhits',
-    'tide',
-    'deepnpts',
-    'tft',
-    'vanilla',
-    'patchtst',
-    'itransformer',
-    'timesnet'
+    'deep_ar', # ....... 11
+    'dilated_rnn', # ... 12
+    #'nbeats',
+    #'nbeatsx',
+    'nhits', # ......... 13
+    'tide', # .......... 14
+    'deep_npts', # ..... 15
+    'tft', # ........... 16
+    'vanilla', # ....... 17
+    'patch_tst', # ..... 18
+    #'itransformer',
+    #'timesnet'
 ]
 
 # pre-trained models' folder
@@ -210,7 +210,7 @@ ffolder = workdir + ffolder
 
 #---------- dataset loading ----------
 
-df = dataset.drop('Real', axis=1)
+df = dataset#.drop('Real', axis=1)
 date_column_name = df.columns[0]
 #date_format = '%Y-%m-%d' if date_column_name.lower() == 'date' else '%Y-%m-%d %H:%M:%S'
 
@@ -220,7 +220,7 @@ date_column_name = df.columns[0]
 if date_column_name.lower() == 'date':
     df[date_column_name] = pd.to_datetime(df[date_column_name])
 else:
-    df[date_column_name] = pd.to_datetime(df[date_column_name]).dt.tz_convert(None)
+    df[date_column_name] = pd.to_datetime(df[date_column_name]).dt.tz_localize(None)
 
 split_idx = get_split_date_index(df, split_date)
 
@@ -234,13 +234,19 @@ ray.init(log_to_driver=False)
 
 warnings.filterwarnings('ignore')
 
+# check for gpu
+print(f'GPU is available: {torch.cuda.is_available()}')
+if torch.cuda.is_available():
+    print(f'Current device: {torch.cuda.current_device()}')
+    print(f'Device name: {torch.cuda.get_device_name(torch.cuda.current_device())}')
+
 #---------- Main forecast loop ----------
 
 i = model_number
 print(f'Forecasting {MODEL_NAMES[i].upper()} since {split_date}')
 nf = NeuralForecast.load(mfolder + MODEL_NAMES[i])
 fc = forecast(nf, df, split_idx, model_number)
-fc.to_csv(ffolder + 'forecast-' + MODEL_NAMES[i] + '.csv', index=False)
+fc.to_csv(ffolder + MODEL_NAMES[i] + '.csv', index=False)
 
 #-------------------------------------------------
 

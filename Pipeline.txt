@@ -1,0 +1,54 @@
+docker:
+	- docker run --name trading -it -v "/mnt/c/dev/cursor/:/home/ubuntu/" -w "/home/ubuntu/" trading
+	- docker start -ai trading (notebook)
+
+1. Data download
+	- notebook (working)
+		. "CCXT Binance 1.Historical Crypto Data and CoinGekgo.ipynb"
+		. https://colab.research.google.com/drive/1PoH6PCOXk9LgSsOqnDpUZ6iGH0Irb9RL
+	
+	- py script (working)
+		. trading container
+		. python3 download_base.py (donwload only 10 top coins, doesn't append _1h at the end of directory)
+		. python3 history_download.py (works like notebook, append _1h at the end of directory)
+
+	1.1 Data update
+		- py script (probably working)
+			. trading container
+			. python3 update_base.py
+
+2.Data preparation
+	- notebook (probably working)
+		. "CCXT Binance 2.Data preparation.ipynb"
+		. https://colab.research.google.com/drive/11q_7r94BmULroix1LbtR00D_Fp6jWjhO
+	
+	- py script (probably working)
+		. python3 prepare_dataset.py --data_dir crypto_historical_data --ohlc_col close --output_csv dataset_close.csv --start_date 2022-01-01
+		
+	- NOTE: rename col 'date' to 'Datetime' manually!!!
+
+3. Cross Prediction
+	- py script (working)
+		. hal gpu container (pytorch cuda)
+		. crossvalidation.py (working)
+
+	3.1. Prediction
+		- crossvalidation.py already predicts
+		- predict.py is only necessary when NOT using cross-validation
+
+4. Backtest
+	- notebook (working)
+		. "CCXT Binance 4.Cross-backtest.ipynb"
+		. https://colab.research.google.com/drive/1txficvKSub6-2oGRmKtoJYSAyfuewqG7
+
+5. Benchmarks
+	- notebook (working)
+		. "CCXT Binance 5.Cross-benchmarks.ipynb"
+		. https://colab.research.google.com/drive/1Yd1sI1_QpUgDFrvVw6RW_vVRMLqDxU_3
+		. merges all coins and models and shows top 10
+
+6. Momentum analysis
+	- notebook (working)
+		. "CCXT Binance 6.Momentum v8 - 2022.ipynb"
+		. https://colab.research.google.com/drive/19WwGf2q1P9-TZWxXIoEtGIYKN1fHm8u-
+		

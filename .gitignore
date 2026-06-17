@@ -172,3 +172,6 @@ cython_debug/
 
 # PyPI configuration file
 .pypirc
+
+# Large local datasets — do not commit (27+ GB)
+datasets/

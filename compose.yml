@@ -1,0 +1,79 @@
+services:
+  jupyter:
+    image: rdrsdr/pytorch-jupyter-gpu:nixtla
+    build:
+      context: .
+      dockerfile: ../docker/Dockerfile-jupyter-pytorch-cuda
+      shm_size: '10gb'
+    shm_size: '10gb'
+    container_name: pytorchgpunixtla
+    # Add restart policy for --rm equivalent
+    restart: "no"
+    # Add remove container when stopped
+    stop_grace_period: 1s
+    ports:
+        - "8888:8888"
+    volumes:
+      - "/home/hal/github/dlfts:/home/jovyan/ai"
+      - type: tmpfs
+        target: "/home/jovyan/ai/lightning_logs"
+    working_dir: "/home/jovyan/ai"
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  #docker run --rm -it --gpus=all -v "/home/hal/docker/2025:/workspace" --tmpfs "/workspace/lightning_logs" rdrsdr/pytorch-cuda:nixtla
+  pytorch:
+    image: rdrsdr/pytorch-cuda:nixtla
+    build:
+      context: .
+      dockerfile: ../docker/Dockerfile-pytorch-cuda
+      shm_size: '10gb'
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    shm_size: '10.07gb'
+    volumes:
+      - /home/hal/docker/2025:/workspace
+    tmpfs:
+      - /workspace/lightning_logs
+    stdin_open: true
+    tty: true
+    restart: "no"
+  
+  #chatgpt generated on 11/04/2025
+  #docker run --rm -it --gpus=all --shm-size=10.07gb -v "/home/hal/docker/2025:/workspace" --tmpfs "/workspace/lightning_logs" rdrsdr/pytorch-cuda:nixtla
+  pytorch-cuda:
+    image: rdrsdr/pytorch-cuda:nixtla
+    #runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    shm_size: '10.07gb'
+    volumes:
+      - /home/hal/docker/2025:/workspace
+      - type: tmpfs
+        target: /workspace/lightning_logs
+    stdin_open: true
+    tty: true
+    restart: "no"
+
+  # https://docs.docker.com/compose/how-tos/gpu-support/
+  # test:
+  #   image: nvidia/cuda:12.3.1-base-ubuntu20.04
+  #   command: nvidia-smi
+  #   deploy:
+  #     resources:
+  #       reservations:
+  #         devices:
+  #           - driver: nvidia
+  #             count: 1
+  #             capabilities: [gpu]

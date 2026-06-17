@@ -1,0 +1,3 @@
+dependencies:
+  - beautifulsoup4
+  - jq
